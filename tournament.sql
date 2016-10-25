@@ -7,17 +7,14 @@
 -- these lines here.
 
 drop table if exists players cascade;
-drop table if exists matchs;
+drop table if exists matches;
 
 CREATE TABLE players ( id SERIAL primary key,
                       name varchar(64) not null);
 
-CREATE TABLE matchs ( id SERIAL,
-                      player1 int references players(id),
-                      player2 int references players(id),
-                      winner int references players(id));
-
-
+CREATE TABLE matches ( id SERIAL,
+                      winner int references players(id),
+                      loser int references players(id));
 
 
 
