@@ -13,9 +13,10 @@ def connect():
 
 def deleteMatches():
     """Remove all the match records from the database."""
+    query = "DELETE FROM matches"
+
     db = connect()
     cursor = db.cursor()
-    query = "delete from matches"
     cursor.execute(query)
     db.commit()
     cursor.close()
@@ -24,9 +25,10 @@ def deleteMatches():
 
 def deletePlayers():
     """Remove all the player records from the database."""
+    query = "DELETE FROM players"
+
     db = connect()
     cursor = db.cursor()
-    query = "delete from players"
     cursor.execute(query)
     db.commit()
     cursor.close()
@@ -35,9 +37,10 @@ def deletePlayers():
     
 def countPlayers():
     """Returns the number of players currently registered."""
+    query = "SELECT count(*) FROM players"
+
     db = connect()
     cursor = db.cursor()
-    query = "select count(*) from players"
     cursor.execute(query)
     count = cursor.fetchone()
     cursor.close()
@@ -55,9 +58,10 @@ def registerPlayer(name):
     Args:
       name: the player's full name (need not be unique).
     """
+    query = "INSERT INTO players (name) VALUES (%s)"
+
     db = connect()
     cursor = db.cursor()
-    query = "insert into players (name) values (%s)"
     cursor.execute(query,(name,))
     db.commit()
     cursor.close()
@@ -66,8 +70,8 @@ def registerPlayer(name):
 def playerStandings():
     """Returns a list of the players and their win records, sorted by wins.
 
-    The first entry in the list should be the player in first place, or a player
-    tied for first place if there is currently a tie.
+    The first entry in the list should be the player in first place, or a 
+    player tied for first place if there is currently a tie.
 
     Returns:
       A list of tuples, each of which contains (id, name, wins, matches):
@@ -76,21 +80,20 @@ def playerStandings():
         wins: the number of matches the player has won
         matches: the number of matches the player has played
     """
+    query = """ 
+        SELECT p.id, p.name, count(m1.winner) as wins, 
+               count(m1.winner)+count(m2.loser) as matches
+        FROM players as p
+        LEFT JOIN matches as m1 on p.id=m1.winner
+        LEFT JOIN matches as m2 on p.id=m2.loser
+        GROUP BY p.id
+        ORDER BY wins DESC
+    """   
+
     db = connect()
     cursor = db.cursor()    
-    
-    query = """ 
-        SELECT p.id, p.name, count(m1.winner) as wins, count(m1.winner) + count(m2.loser) as matches
-        FROM players as p
-        LEFT JOIN matches as m1 on p.id = m1.winner
-        LEFT JOIN matches as m2 on p.id = m2.loser
-        GROUP BY p.id
-        ORDER BY wins desc
-    """    
-
     cursor.execute(query)
     standings = cursor.fetchall()
-    
     cursor.close()
     db.close()
     return standings
@@ -102,9 +105,10 @@ def reportMatch(winner, loser):
       winner:  the id number of the player who won
       loser:  the id number of the player who lost
     """
+
+    query = "INSERT INTO matches (winner,loser) VALUES (%s,%s)"
     db = connect()
     cursor = db.cursor()
-    query = "insert into matches (winner,loser) values (%s,%s)"
     cursor.execute(query,(winner,loser))
     db.commit()
     cursor.close()
